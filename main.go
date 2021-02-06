@@ -25,6 +25,7 @@ func initArgs() {
 func main() {
 	initArgs()
 	router := routers.InitRouter()
+	router.LoadHTMLGlob("views/*")
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "test",

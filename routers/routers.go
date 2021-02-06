@@ -14,6 +14,7 @@ func InitRouter() *gin.Engine {
 
 	r.Use(gin.Recovery())
 	gin.SetMode(setting.RunMode)
+	r.GET("/", api.GoHome)
 
 	r.GET("/auth", api.GetAuth)
 
