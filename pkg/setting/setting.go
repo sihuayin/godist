@@ -19,12 +19,14 @@ var (
 	PageSize  int
 	JwtSecret string
 
-	DatabaseUser   string
-	DatabasePWD    string
-	DatabaseHost   string
-	DatabasePort   string
-	DatabaseDBName string
-	DatabaseDBPRE  string
+	DatabaseUser        string
+	DatabasePWD         string
+	DatabaseHost        string
+	DatabasePort        string
+	DatabaseDBName      string
+	DatabaseDBPRE       string
+	DatabaseMaxIdleConn int
+	DatabaseMaxOpenConn int
 )
 
 func init() {
@@ -67,6 +69,8 @@ func LoadDatabase() {
 	DatabasePort = sec.Key("DATABASE_PORT").MustString("8000")
 	DatabaseDBName = sec.Key("DATABASE_DB_NAME").MustString("walle")
 	DatabaseDBPRE = sec.Key("DATABASE_TABLE_PREFIX").MustString("")
+	DatabaseMaxIdleConn = sec.Key("DATABASE_DB_MAX_IDLE_CONN").MustInt(100)
+	DatabaseMaxOpenConn = sec.Key("DATABASE_DB_OPEN_CONN").MustInt(20)
 }
 
 func LoadApp() {

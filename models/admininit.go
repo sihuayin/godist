@@ -1,15 +1,30 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
-	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 	"github.com/sihuayin/godist/pkg/setting"
 )
 
-var o orm.Ormer
+var globalDB *gorm.DB
+var (
+	port, user, password, host, dbName, pre string
+)
+
+func init() {
+	port = setting.DatabasePort
+	user = setting.DatabaseUser
+	password = setting.DatabasePWD
+	host = setting.DatabaseHost
+	dbName = setting.DatabaseDBName
+	pre = setting.DatabaseDBPRE
+}
 
 func Syncdb() {
 	log.Println("数据库初始化开始")
@@ -19,101 +34,78 @@ func Syncdb() {
 		return
 	}
 
-	// Connect()
-	// o = orm.NewOrm()
-	// // 数据库别名
-	// name := "default"
-	// // drop table 后再建表
-	// force := false
-	// // 打印执行过程
-	// verbose := true
-	// // 遇到错误立即返回
-	// err = orm.RunSyncdb(name, force, verbose)
-	// if err != nil {
-	// 	beego.Error("数据表创建错误:", err)
-	// }
-	// beego.Info("数据表创建完成")
-	// insertUser()
+	Connect()
+	insertUser()
 	fmt.Println("数据添加完成")
 
 }
 
 //数据库连接
-// func Connect() {
-// 	dbUser := beego.AppConfig.String("mysqluser")
-// 	dbPass := beego.AppConfig.String("mysqlpass")
-// 	dbHost := beego.AppConfig.String("mysqlhost")
-// 	dbPort := beego.AppConfig.String("mysqlport")
-// 	dbName := beego.AppConfig.String("mysqldb")
-// 	if beego.BConfig.RunMode == "docker" {
-// 		if os.Getenv("MYSQL_USER") != "" {
-// 			dbUser = os.Getenv("MYSQL_USER")
-// 		}
-// 		if os.Getenv("MYSQL_PASS") != "" {
-// 			dbPass = os.Getenv("MYSQL_PASS")
-// 		}
-// 		if os.Getenv("MYSQL_HOST") != "" {
-// 			dbHost = os.Getenv("MYSQL_HOST")
-// 		}
-// 		if os.Getenv("MYSQL_PORT") != "" {
-// 			dbPort = os.Getenv("MYSQL_PORT")
-// 		}
-// 		if os.Getenv("MYSQL_DB") != "" {
-// 			dbName = os.Getenv("MYSQL_DB")
-// 		}
-// 	}
+func Connect() {
 
-// 	maxIdleConn, _ := beego.AppConfig.Int("mysql_max_idle_conn")
-// 	maxOpenConn, _ := beego.AppConfig.Int("mysql_max_open_conn")
-// 	dbLink := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", dbUser, dbPass, dbHost, dbPort, dbName) + "&loc=Asia%2FShanghai"
-// 	//utils.Display("dbLink", dbLink)
-// 	err := orm.RegisterDriver("mysql", orm.DRMySQL)
-// 	if err != nil {
-// 		beego.Error("数据库连接错误:", err)
-// 		os.Exit(2)
-// 		return
-// 	}
-// 	err = orm.RegisterDataBase("default", "mysql", dbLink, maxIdleConn, maxOpenConn)
-// 	orm.Debug = true
-// 	if err != nil {
-// 		beego.Error("数据库连接错误:", err)
-// 		os.Exit(2)
-// 		return
-// 	}
-// }
+	maxIdleConn := setting.DatabaseMaxIdleConn
+	maxOpenConn := setting.DatabaseMaxOpenConn
+	dbLink := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, dbName) + "&loc=Asia%2FShanghai"
+	// 	//utils.Display("dbLink", dbLink)
+	db, err := gorm.Open("mysql", dbLink)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		return pre + defaultTableName
+	}
+
+	db.SingularTable(true)
+	db.LogMode(true)
+	db.DB().SetMaxIdleConns(maxIdleConn)
+	db.DB().SetMaxOpenConns(maxOpenConn)
+	globalDB = db
+}
 
 //创建数据库
 func createdb() error {
-	sqlstring := fmt.Sprintf(" CREATE DATABASE if not exists `%s` CHARSET utf8 COLLATE utf8_general_ci", setting.DatabaseDBName)
-	r, err := db.Exec(sqlstring).Rows()
+	var dsn string
+	var sqlstring string
+
+	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8", user, password, host, port)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Println(r)
+		log.Fatal("数据库连接错误:", err)
+		os.Exit(2)
+		//panic(err.Error())
+		return err
+	}
+	sqlstring = fmt.Sprintf(" CREATE DATABASE if not exists `%s` CHARSET utf8 COLLATE utf8_general_ci", dbName)
+	r, err := db.Exec(sqlstring)
+	if err != nil {
 		log.Println(err)
+		log.Println(r)
+		db.Close()
 		return err
 	} else {
-		log.Println("数据库" + setting.DatabaseDBName + "创建成功")
+		db.Close()
+		log.Println("数据库" + dbName + "创建成功")
 		return nil
 	}
-
 }
 
-// func insertUser() {
-// 	fmt.Println("insert user ...")
-// 	u := new(User)
-// 	u.Id = 1
-// 	u.Username = "admin"
-// 	u.IsEmailVerified = 1
-// 	u.AuthKey = "cJIrTa_b2Hnjn6BZkrL8PJkYto2Ael3O"
-// 	u.PasswordHash = "$2y$13$8q0MfKpnghuqCL.3FAAjiOkA8kBFNCW.ECUlqWp1zTpMHs9e5xn6u"
-// 	u.EmailConfirmationToken = "UpToOIawm1L8GjN6pLO4r-1oj20nLT5f_1443280741"
-// 	u.Email = "chuanzegao@163.com"
-// 	u.Avatar = "default.jpg"
-// 	u.Role = 1
-// 	u.Status = 10
-// 	u.CreatedAt = time.Now()
-// 	u.UpdatedAt = time.Now()
-// 	u.Realname = "管理员"
-// 	o = orm.NewOrm()
-// 	o.Insert(u)
-// 	fmt.Println("insert user end")
-// }
+func insertUser() {
+	fmt.Println("insert user ...")
+	u := new(User)
+	u.Id = 1
+	u.Username = "admin"
+	u.IsEmailVerified = 1
+	u.AuthKey = "cJIrTa_b2Hnjn6BZkrL8PJkYto2Ael3O"
+	u.PasswordHash = "$2y$13$8q0MfKpnghuqCL.3FAAjiOkA8kBFNCW.ECUlqWp1zTpMHs9e5xn6u"
+	u.EmailConfirmationToken = "UpToOIawm1L8GjN6pLO4r-1oj20nLT5f_1443280741"
+	u.Email = "chuanzegao@163.com"
+	u.Avatar = "default.jpg"
+	u.Role = 1
+	u.Status = 10
+	u.CreatedAt = time.Now()
+	u.UpdatedAt = time.Now()
+	u.Realname = "管理员"
+	globalDB.CreateTable(&User{}).Create(u)
+	fmt.Println("insert user end")
+}

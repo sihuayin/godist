@@ -9,6 +9,7 @@ import (
 
 	"github.com/sihuayin/godist/models"
 	"github.com/sihuayin/godist/pkg/setting"
+	"github.com/sihuayin/godist/routers"
 )
 
 func initArgs() {
@@ -23,7 +24,7 @@ func initArgs() {
 
 func main() {
 	initArgs()
-	router := gin.Default()
+	router := routers.InitRouter()
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "test",

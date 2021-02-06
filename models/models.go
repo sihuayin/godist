@@ -11,7 +11,7 @@ import (
 
 var db *gorm.DB
 
-func init() {
+func initData() {
 	var (
 		err                             error
 		port, user, password, host, pre string
