@@ -35,6 +35,7 @@ func Syncdb() {
 	}
 
 	Connect()
+	autoMigrate()
 	insertUser()
 	fmt.Println("数据添加完成")
 
@@ -45,7 +46,7 @@ func Connect() {
 
 	maxIdleConn := setting.DatabaseMaxIdleConn
 	maxOpenConn := setting.DatabaseMaxOpenConn
-	dbLink := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, dbName) + "&loc=Asia%2FShanghai"
+	dbLink := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", user, password, host, port, dbName) + "&loc=Asia%2FShanghai"
 	// 	//utils.Display("dbLink", dbLink)
 	db, err := gorm.Open("mysql", dbLink)
 
@@ -68,7 +69,7 @@ func createdb() error {
 	var dsn string
 	var sqlstring string
 
-	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8", user, password, host, port)
+	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true", user, password, host, port)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("数据库连接错误:", err)
@@ -90,10 +91,16 @@ func createdb() error {
 	}
 }
 
+// 自动迁移
+func autoMigrate() {
+	globalDB.AutoMigrate(&User{})
+}
+
+// 初始化用户
 func insertUser() {
 	fmt.Println("insert user ...")
 	u := new(User)
-	u.Id = 1
+	u.ID = 1
 	u.Username = "admin"
 	u.IsEmailVerified = 1
 	u.AuthKey = "cJIrTa_b2Hnjn6BZkrL8PJkYto2Ael3O"
@@ -106,6 +113,6 @@ func insertUser() {
 	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
 	u.Realname = "管理员"
-	globalDB.CreateTable(&User{}).Create(u)
+	globalDB.Create(u)
 	fmt.Println("insert user end")
 }

@@ -16,7 +16,8 @@ func InitRouter() *gin.Engine {
 	gin.SetMode(setting.RunMode)
 	r.GET("/", api.GoHome)
 
-	r.GET("/auth", api.GetAuth)
+	r.POST("/login", api.GetAuth)
+	r.POST("/logout", api.AuthLogout)
 
 	// apiv1 := r.Group("/api/v1")
 	// {
