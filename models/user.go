@@ -36,9 +36,21 @@ func FindOneByName(name string) *User {
 	return &u
 }
 
+func FindOneByID(id uint) *User {
+	var u User
+	// fmt.Println(db)
+	globalDB.Table("user").Where("id = ?", id).Scan(&u)
+
+	return &u
+}
+
 func FindOneByAuthKey(key string) *User {
 	var u User
 	// fmt.Println(db)
 	globalDB.Table("user").Where("auth_key = ?", key).Scan(&u)
 	return &u
+}
+
+func UpdateUserById(user *User) error {
+	return globalDB.Save(&user).Error
 }
