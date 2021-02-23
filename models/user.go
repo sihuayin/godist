@@ -1,11 +1,10 @@
 package models
 
 import (
-	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 type User struct {
@@ -33,6 +32,13 @@ func FindOneByName(name string) *User {
 	var u User
 	// fmt.Println(db)
 	globalDB.Table("user").Where("username = ?", name).Scan(&u)
-	fmt.Println(u.PasswordHash)
+
+	return &u
+}
+
+func FindOneByAuthKey(key string) *User {
+	var u User
+	// fmt.Println(db)
+	globalDB.Table("user").Where("auth_key = ?", key).Scan(&u)
 	return &u
 }
