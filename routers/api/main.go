@@ -7,7 +7,7 @@ import (
 )
 
 func GoHome(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+	c.HTML(http.StatusOK, "index.tpl", gin.H{
 		"title": "Main website11",
 	})
 }
