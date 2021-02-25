@@ -51,3 +51,9 @@ func (u *Project) Save() error {
 func (u *Project) Create() (*Project, error) {
 	return nil, nil
 }
+
+func FindProjects(where string, start, length int) (*[]Project, error) {
+	var projects Project
+	globalDB.Raw("SELECT *, (SELECT realname FROM `user` WHERE `user`.id=project.user_id LIMIT 1) as realname FROM `project`  WHERE 1=1 "+where+" ORDER BY id LIMIT ?,?", start, length).Scan(&projects)
+	return nil, nil
+}

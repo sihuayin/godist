@@ -23,6 +23,7 @@ func InitRouter() *gin.Engine {
 	r.POST("/logout", api.AuthLogout)
 	r.POST("/changePasswd", api.AuthChangePWD)
 
+	r.GET("/api/get/conf/list", api.PostConfList)
 	r.POST("/api/post/conf/save", api.PostConfSave)
 
 	// apiv1 := r.Group("/api/v1")
