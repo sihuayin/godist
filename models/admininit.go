@@ -93,7 +93,7 @@ func createdb() error {
 
 // 自动迁移
 func autoMigrate() {
-	globalDB.AutoMigrate(&User{})
+	globalDB.AutoMigrate(&User{}, &Project{})
 }
 
 // 初始化用户

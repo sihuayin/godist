@@ -7,17 +7,17 @@ import (
 )
 
 type Project struct {
-	Id             int       `gorm:"column(id);auto"`
+	Id             int       `gorm:"column(id);auto" json:"id" form:"id"`
 	UserId         uint      `gorm:"column(user_id)"`
-	Name           string    `gorm:"column(name);size(100);null"`
-	Level          int16     `gorm:"column(level)"`
+	Name           string    `gorm:"column(name);size(100);null" json:"name" form:"name"`
+	Level          int16     `gorm:"column(level)" json:"level"`
 	Status         int16     `gorm:"column(status)"`
 	Version        string    `gorm:"column(version);size(32);null"`
 	RepoUrl        string    `gorm:"column(repo_url);type(text);null"`
 	RepoUsername   string    `gorm:"column(repo_username);size(50);null"`
 	RepoPassword   string    `gorm:"column(repo_password);size(100);null"`
 	RepoMode       string    `gorm:"column(repo_mode);size(50);null"`
-	RepoType       string    `gorm:"column(repo_type);size(10);null"`
+	RepoType       string    `gorm:"column(repo_type);size(10);null" json:"repo_type"`
 	DeployFrom     string    `gorm:"column(deploy_from);size(200)"`
 	Excludes       string    `gorm:"column(excludes);type(text);null"`
 	ReleaseUser    string    `gorm:"column(release_user);size(50)"`
@@ -45,15 +45,25 @@ func (u *Project) TableName() string {
 }
 
 func (u *Project) Save() error {
-	return nil
+	err := globalDB.Save(u).Error
+	return err
 }
 
 func (u *Project) Create() (*Project, error) {
-	return nil, nil
+	err := globalDB.Create(u).Error
+	return u, err
 }
 
-func FindProjects(where string, start, length int) (*[]Project, error) {
-	var projects Project
-	globalDB.Raw("SELECT *, (SELECT realname FROM `user` WHERE `user`.id=project.user_id LIMIT 1) as realname FROM `project`  WHERE 1=1 "+where+" ORDER BY id LIMIT ?,?", start, length).Scan(&projects)
-	return nil, nil
+func FindProjects(where string, start, length int) (pros []Project, err error) {
+	globalDB.Raw("SELECT *, (SELECT realname FROM `user` WHERE `user`.id=project.user_id LIMIT 1) as realname FROM `project`  WHERE 1=1 "+where+" ORDER BY id LIMIT ?,?", start, length).Scan(&pros)
+	return
+}
+
+func GetProjectById(id int) (pro Project, err error) {
+	globalDB.Where(&Project{Id: id}).First(&pro)
+	return
+}
+
+func DeleteProject(id int) error {
+	return globalDB.Where("id = ?", id).Delete(&Project{}).Error
 }

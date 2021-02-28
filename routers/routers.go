@@ -25,6 +25,10 @@ func InitRouter() *gin.Engine {
 
 	r.GET("/api/get/conf/list", api.PostConfList)
 	r.POST("/api/post/conf/save", api.PostConfSave)
+	r.GET("/api/get/conf/get", api.PostConfInfo)
+	r.GET("/api/get/conf/del", api.DeletePostConf)
+	r.GET("/api/get/conf/copy", api.CopyPostConf)
+	r.GET("/api/get/conf/mylist", api.PostConfOfMine)
 
 	// apiv1 := r.Group("/api/v1")
 	// {
