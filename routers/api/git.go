@@ -11,7 +11,7 @@ func GetGitBranch(c *gin.Context) {
 
 	projectId := c.DefaultQuery("projectId", "0")
 	pid, _ := strconv.Atoi(projectId)
-	// pro, _ := models.GetProjectById(pid)
+
 	if pid == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
@@ -20,6 +20,7 @@ func GetGitBranch(c *gin.Context) {
 		})
 		return
 	}
+	// pro, _ := models.GetProjectById(pid)
 
 	// userInterface, ok := c.Get("User")
 	// if !ok {

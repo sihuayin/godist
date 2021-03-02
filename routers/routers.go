@@ -30,6 +30,8 @@ func InitRouter() *gin.Engine {
 	r.GET("/api/get/conf/copy", api.CopyPostConf)
 	r.GET("/api/get/conf/mylist", api.PostConfOfMine)
 
+	r.GET("/api/get/git/branch", api.GetGitBranch)
+
 	// apiv1 := r.Group("/api/v1")
 	// {
 
