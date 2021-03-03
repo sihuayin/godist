@@ -57,7 +57,7 @@ func LocalExec(cmd string) ExecResult {
 	err := execCommand.Run()
 	if err != nil {
 		execResult.Error = err
-		execResult.ErrorInfo = err.Error()
+		// execResult.ErrorInfo = err.Error()
 		execResult.Result = b1.String()
 		return execResult
 	} else {

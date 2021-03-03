@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sihuayin/godist/models"
+	"github.com/sihuayin/godist/pkg/components"
 )
 
 func GetGitBranch(c *gin.Context) {
@@ -20,7 +22,9 @@ func GetGitBranch(c *gin.Context) {
 		})
 		return
 	}
-	// pro, _ := models.GetProjectById(pid)
+	pro, _ := models.GetProjectById(pid)
+	gitCom := components.NewGitComponent(&pro)
+	list, _ := gitCom.GetBranchList()
 
 	// userInterface, ok := c.Get("User")
 	// if !ok {
@@ -34,9 +38,9 @@ func GetGitBranch(c *gin.Context) {
 	// pro.Id = 0
 	// pro.UserId = uint(user.ID)
 	// newPro, _ := pro.Create()
-	// c.JSON(http.StatusOK, gin.H{
-	// 	"code": 0,
-	// 	"msg":  "成功",
-	// 	"data": newPro,
-	// })
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "成功",
+		"data": list,
+	})
 }

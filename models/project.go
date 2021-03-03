@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -52,6 +54,36 @@ func (u *Project) Save() error {
 func (u *Project) Create() (*Project, error) {
 	err := globalDB.Create(u).Error
 	return u, err
+}
+
+func (u *Project) getEnv() string {
+	if u.Level == 1 {
+		return "test"
+	}
+	if u.Level == 2 {
+		return "simu"
+	}
+	if u.Level == 3 {
+		return "prod"
+	}
+	return "unknow"
+}
+
+func (u *Project) GetGitProjectName(gitUrl string) string {
+	s := strings.Split(gitUrl, "/")
+	sname := s[len(s)-1]
+	snames := strings.Split(sname, `.git`)
+	if snames[0] == "" {
+		return "filedir"
+	}
+	return snames[0]
+}
+
+func (u *Project) GetDeployFromDir() string {
+	from := u.DeployFrom
+	env := u.getEnv()
+	project := u.GetGitProjectName(u.RepoUrl)
+	return fmt.Sprintf("%s/%s/%s", strings.TrimRight(from, "/"), strings.TrimRight(env, "/"), project)
 }
 
 func FindProjects(where string, start, length int) (pros []Project, err error) {
