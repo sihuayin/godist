@@ -50,7 +50,17 @@ func (git *GitComponent) UpdateRepo(branch, gitDir string) error {
 		}
 	}
 
-	return nil
+	cmds := []string{}
+	cmds = append(cmds, fmt.Sprintf("cd %s ", gitDir))
+	cmds = append(cmds, fmt.Sprintf("/usr/bin/env git fetch --all"))
+	cmds = append(cmds, fmt.Sprintf("/usr/bin/env git reset --hard origin/master "))
+	cmds = append(cmds, fmt.Sprintf("/usr/bin/env git checkout -q %s ", branch))
+	cmds = append(cmds, fmt.Sprintf("/usr/bin/env git fetch -q --all"))
+	cmds = append(cmds, fmt.Sprintf("/usr/bin/env git reset -q --hard origin/%s ", branch))
+	cmd := strings.Join(cmds, " && ")
+	err := git.runLocalCommand(cmd)
+
+	return err
 }
 
 func (git *GitComponent) runLocalCommand(command string) error {
